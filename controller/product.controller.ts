@@ -17,7 +17,7 @@ export const createProductHandler = async(req: Request<{}, {}, ProductInput>, re
         const product = await createProduct({...req.body, user: userId});
         res.send(product);
     }catch(e:any){
-        res.status(400).send(`An error ${e} occurred in createProductHandler.`)
+        res.status(403).send(`An error ${e} occurred in createProductHandler.`)
     }
 }
 
@@ -30,7 +30,7 @@ export const getProductHandler = async(req: Request<ParamsInput>, res: Response)
         const product = await getProduct({_id: req.params.productId});
         res.send(product);
     }catch(e:any){
-        res.status(400).send(`An error ${e} occurred in getProductHandler.`)
+        res.status(404).send(`An error ${e} occurred in getProductHandler.`)
     }
 }
 

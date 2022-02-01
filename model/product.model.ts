@@ -21,6 +21,8 @@ const productSchema = new mongoose.Schema({
     price: {type: Number},
     image: {type: String},
     user: {type: mongoose.Types.ObjectId, ref: 'User'},
+}, {
+    timestamps: true
 });
 
 const ProductModel = mongoose.model<ProductDocument>('Product', productSchema);

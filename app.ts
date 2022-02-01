@@ -1,15 +1,9 @@
-import express from 'express';
 import config from 'config';
 import log from './utils/logger';
-import routes from './routes';
 import connectDB from './utils/connectDB';
-import deserializeUser from './middleware/deserializeUser';
+import serverApp from './utils/server';
 
-const app = express();
-
-app.use(express.json());
-
-app.use(deserializeUser);
+const app = serverApp();
 
 const port = config.get<number>('port');
 
@@ -27,5 +21,5 @@ const start = async() => {
 
 start();
 
-routes(app);
+
 

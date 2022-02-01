@@ -1,0 +1,143 @@
+mongoDB fake server tests
+product tests
+
+get product route
+
+if product doesn't exist 404
+if product exist 200 and body of product
+
+create product
+
+if user isn't logged in 403 status
+if user is logged in 200 and body of product
+
+mockTests from here
+user tests
+
+user reg
+
+if user name, email, password are valid 200 and user payload
+mock should also be called with payload
+
+if password and reconfirmation password don't match 400 mock should
+not have run
+
+if service throws error 400 mock should be called with payload
+
+create session
+
+if email and password are valid 200 return access and refresh token
+
+const userId = new mongoose.Types.ObjectId().toString();
+
+const mongoServer = await MongooseMemoryServer.create();
+await mongoose.connect(mongoServer.getUri());
+
+await mongoose.disconnect();
+await mongoose.connection.close();
+
+******************************
+
+const app = serverApp();
+
+const userId = new mongoose.Types.ObjectId().toString();
+
+const productId = new mongoose.Types.ObjectId().toString();
+
+const createProductPayload = {
+    title: 'Dreams',
+    image: 'img.jpeg',
+    price: 200,
+    description: 'The dreams are too real!'
+}
+
+const productPayload = {
+    title: 'Dreams',
+    image: 'img.jpeg',
+    price: 200,
+    description: 'The dreams are too real!',
+    user: userId
+}
+
+const getProductPayload = {
+    title: 'Dreams',
+    image: 'img.jpeg',
+    price: 200,
+    description: 'The dreams are too real!',
+    _id: productId
+}
+
+const userPayload = {
+    _id: userId,
+    email: 'badre@gmail.com',
+    name: 'badre'
+}
+
+describe('Product', () => {
+    beforeAll(async() => {
+        const mongoServer = await MongoMemoryServer.create();
+        await mongoose.connect(mongoServer.getUri());
+    })
+    afterAll(async() => {
+        await mongoose.disconnect();
+        await mongoose.connection.close();
+    })
+    describe('Create Product', () => {
+        describe('If user isn\'t logged in', () => {
+            it('it should return 403 status', async() => {
+                const {statusCode} = await supertest(app)
+                .post('/api/v1/product').send(createProductPayload);
+
+                expect(statusCode).toBe(403);
+            })
+        })
+        describe('If user has logged in', () => {
+            it('it should return 200 status and return product body', async() => {
+                const jwt = signJwt(userPayload);
+
+                const {statusCode, body} = await supertest(app)
+                .post('/api/v1/product')
+                .set('Authorization', `Bearer ${jwt}`)
+                .set('x-refresh', `${jwt}`)
+                .send(createProductPayload);
+
+                expect(statusCode).toBe(200);
+
+                expect(body).toStrictEqual({
+                    ...productPayload,
+                    createdAt: expect.any(String),
+                    updatedAt: expect.any(String),
+                    __v: 0,
+                    _id: expect.any(String)
+                })
+            })
+        })
+    })
+    describe('Get Product Route', () => {
+        describe('If user doesn\'t exist', () => {
+            it('return status code 404', async() => {
+                const {statusCode} = await supertest(app)
+                .get(`/api/v1/product/:${productId}`);
+
+                expect(statusCode).toBe(404);
+            })
+        })
+        describe('If user exist', () => {
+            it('return status code 200 and body of the product', async() => {
+                const {statusCode, body} = await supertest(app)
+                .get(`/api/v1/product/:${productId}`);
+
+                expect(statusCode).toBe(200);
+
+                expect(body).toStrictEqual({
+                    ...getProductPayload,
+                    __v: 0,
+                    createdAt: expect.any(String),
+                    updatedAt: expect.any(String),
+                    user: expect.any(String)
+                })
+            })
+        })
+    })
+})
+
