@@ -2,7 +2,7 @@ import { Express } from "express"
 import { Request, Response } from "express"
 import { createProductHandler, deleteProductHandler, getProductHandler, updateProductHandler } from "./controller/product.controller";
 import { createSessionHandler, findSessionHandler, updateSessionHandler } from "./controller/session.controller";
-import createUserHandler from "./controller/user.controller";
+import createUserHandler, { getUserHandler } from "./controller/user.controller";
 import requireUser from "./middleware/requireUser";
 import validateResources from "./middleware/validateResources";
 import { productCreateSchema, productDeleteSchema, productGetSchema, productUpdateSchema } from "./schema/product.schema";
@@ -17,6 +17,7 @@ const routes = async(app: Express) => {
     });
 
     app.route('/api/v1/user').post(validateResources(userSchema), createUserHandler);
+    app.route('/api/v1/user').get(requireUser, getUserHandler);
 
     app.route('/api/v1/session').post(validateResources(sessionSchema), createSessionHandler)
     .get(requireUser, findSessionHandler);
